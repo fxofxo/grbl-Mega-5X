@@ -2,7 +2,7 @@
   config.h - compile time configuration
   Part of Grbl
 
-  Copyright (c) 2017-2022 Gauthier Briere
+  Copyright (c) 2017-2018 Gauthier Briere
   Copyright (c) 2012-2016 Sungeun K. Jeon for Gnea Research LLC
   Copyright (c) 2009-2011 Simen Svale Skogsrud
 
@@ -32,28 +32,31 @@
 
 #include "grbl.h" // For Arduino IDE compatibility.
 
-// Serial baud rate
-#define BAUD_RATE 115200
 
 // Define CPU pin map and default settings.
 // NOTE: OEMs can avoid the need to maintain/update the defaults.h and cpu_map.h files and use only
 // one configuration file by placing their specific defaults and pin map at the bottom of this file.
 // If doing so, simply comment out these two defines and see instructions below.
-#define DEFAULTS_GENERIC
+//#define DEFAULTS_GENERIC
+// To use with RAMPS 1.4 Board, comment out the above define and uncomment the next two defines
+#define DEFAULTS_RAMPS_BOARD
 #define CPU_MAP_2560_RAMPS_BOARD
 
-//----------------------------------------------------------------------
-// Axis definitions :
-//----------------------------------------------------------------------
-// IMPORTANT: When changing the axis definitions (axis numbers N_AXIS, 
-// linears axis number N_AXIS_LINEAR or axes names AXIS_*_NAME, 
-// don't forget to issue the reset factory defaults Grbl command: $RST=*
-// if you forget the $RST=* command after change, Grbl may have 
-// unpredictable behavior!
-//----------------------------------------------------------------------
+// Serial baud rate
+// #define BAUD_RATE 230400
+#define BAUD_RATE 115200
 
-#define N_AXIS 5        // Number of axes (3 to 6)
-#define N_AXIS_LINEAR 3 // Number of linears axis, must be <= N_AXIS
+// Axis array index values. Must start with 0 and be continuous.
+#ifdef DEFAULTS_RAMPS_BOARD
+  // 4, 5 & 6 axis support only for RAMPS 1.4 (for the moment :-)...)
+  //#define N_AXIS 5            // Number of axes
+  //#define N_AXIS_LINEAR 3     // Number of linears axis
+  #define N_AXIS  4          // Number of axes KH
+  #define N_AXIS_LINEAR 4     // Number of linears axis KH
+#else
+  #define N_AXIS 5            // Number of axes (3 to 6)
+  #define N_AXIS_LINEAR 3     // Number of linears axis
+#endif
 
 // Axis indexing and names
 #define AXIS_1 0        // Axis indexing value. Must start with 0 and be continuous.
@@ -67,7 +70,8 @@
 #endif
 #if N_AXIS > 3
   #define AXIS_4 3
-  #define AXIS_4_NAME 'A' // Letter of axis number 4
+  //#define AXIS_4_NAME 'A' // Letter of axis number 4
+  #define AXIS_4_NAME 'U' // Letter of axis number 4 KH
 #endif
 #if N_AXIS > 4
   #define AXIS_5 4
@@ -85,7 +89,7 @@
 // the order of their number. Some graphical interface are not able to affect axis values reported
 // by Grbl to the correct axis name.
 // Uncomment to enable sorting of axis values by axis_names rather than by axis number. Default disabled.
-// If this option is enabled, the sorting order will be X, Y, Z, U, V, W, A, B, C, D, E & H 
+// If this option is enabled, the sorting order will be X, Y, Z, U, V, W, A, B, C, D, E & H
 // as defined below.
 //#define SORT_REPORT_BY_AXIS_NAME
 //#define AXIS_NAME_SORT_ORDER {'X', 'Y', 'Z', 'U', 'V', 'W', 'A', 'B', 'C', 'D', 'E', 'H'}
@@ -120,13 +124,20 @@
 // SPINDLE_PWM_ON_D9  => 0-12v 8 bits PWM on RAMPS D9
 // SPINDLE_PWM_ON_D6  => 0-5v 8bits PWM on RAMPS Servo 2 signal (Mega 2560 D6)
 // Uncomment the line which correspond to your hardware
+
+// FoamCutter Chose the spindle pin output :
+// SPINDLE_PWM_ON_D8  => 0-12v 16 bits PWM on RAMPS D8
+// SPINDLE_PWM_ON_D6  => 0-5v 8bits PWM on RAMPS Servo 2 signal (Mega 2560 D6)
+// Uncomment the line which correspond to your hardware
+//#define SPINDLE_PWM_ON_D6
+
 #define SPINDLE_PWM_ON_D8
 //#define SPINDLE_PWM_ON_D6
 //#define SPINDLE_PWM_ON_D9
 
 // Spindle PWM signal inversion:
 // In case of particular electronics, it may be necessary to invert the values
-// of the PWM signal of the spindle. For example, if the minimum spindle 
+// of the PWM signal of the spindle. For example, if the minimum spindle
 // rpm is 1 and maximum is 1000, M3S250 will output 75% instead of 25% and
 // M3S750 will output 25% instead of 75%. Disabled by default
 //#define INVERT_SPINDLE_PWM_VALUES
@@ -139,34 +150,34 @@
 //----------------------------------------------------------------------
 // ! IMPORTANT: When changing the SEPARATE_SPINDLE_LASER_PIN compil option,
 // don't forget to issue the reset factory defaults Grbl command: $RST=*
-// if you forget the $RST=* command after change, Grbl may have 
+// if you forget the $RST=* command after change, Grbl may have
 // unpredictable behavior!
 //----------------------------------------------------------------------
 // Uncomment the next line to enable this functionality (default disabled):
 //#define SEPARATE_SPINDLE_LASER_PIN
 
 #ifdef SEPARATE_SPINDLE_LASER_PIN
-  // Laser PWM can be on D6 (default) or on D8 or D9. 
+  // Laser PWM can be on D6 (default) or on D8 or D9.
   #define LASER_PWM_ON_D6
   //#define LASER_PWM_ON_D8
   //#define LASER_PWM_ON_D9
 #endif
 
-// Use output PWM drived by GCode command M67(Analog Output,Synchronized) 
+// Use output PWM drived by GCode command M67(Analog Output,Synchronized)
 // or GCode command M68(Analog Output, Immediate).
 //----------------------------------------------------------------------
 // ! IMPORTANT: When changing the USE_OUTPUT_PWM compil option,
 // don't forget to issue the reset factory defaults Grbl command: $RST=*
-// if you forget the $RST=* command after change, Grbl may have 
+// if you forget the $RST=* command after change, Grbl may have
 // unpredictable behavior!
 //----------------------------------------------------------------------
 // Uncomment the next line to enable the use of M67/M68 PWM output (Disabled by default).
 //#define USE_OUTPUT_PWM
 
 #ifdef USE_OUTPUT_PWM
-  // Optional PWM can be on D9 (default) or on D8 or D6. 
+  // Optional PWM can be on D9 (default) or on D8 or D6.
   // Warning ! Optional can't use the same timer than the spindle or the laser pin
-  // For more information about this, see the comment of the relevant section in cpu_map.h 
+  // For more information about this, see the comment of the relevant section in cpu_map.h
   #define OUTPUT_PWM_ON_D9
   //#define OUTPUT_PWM_ON_D8
   //#define OUTPUT_PWM_ON_D6
@@ -238,33 +249,35 @@
 // on separate pin, but homed in one cycle. Also, it should be noted that the function of hard limits
 // will not be affected by pin sharing.
 // NOTE: Defaults are set for a traditional 3-axis CNC machine. Z-axis first to clear, followed by X & Y.
-#if N_AXIS == 4 // 4 axis : homing
-  #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
-  #define HOMING_CYCLE_1 ((1<<AXIS_1)|(1<<AXIS_2))     // OPTIONAL: uncomment to move X,Y at the same time.
-  //#define HOMING_CYCLE_1 (1<<AXIS_1) // Home X axis  // OPTIONAL: uncomment to move only X at a time.
-  //#define HOMING_CYCLE_2 (1<<AXIS_2) // Home Y axis  // OPTIONAL: uncomment to move only Y at a time.
-  //#define HOMING_CYCLE_3 (1<<AXIS_4) // Home 4th axis (A)
-#elif N_AXIS == 5 // 5 axis : homing
-  #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
-  #define HOMING_CYCLE_1 ((1<<AXIS_1)|(1<<AXIS_2))     // OPTIONAL: uncomment to move X,Y at the same time.
-  //#define HOMING_CYCLE_1 (1<<AXIS_1) // Home X axis  // OPTIONAL: uncomment to move only X at a time.
-  //#define HOMING_CYCLE_2 (1<<AXIS_2) // Home Y axis  // OPTIONAL: uncomment to move only Y at a time.
-  //#define HOMING_CYCLE_3 (1<<AXIS_4) // Home 4th axis (A)
-  //#define HOMING_CYCLE_4 (1<<AXIS_5) // Home 5th axis (B)
-#elif N_AXIS == 6 // 6 axis : homing
-  #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
-  #define HOMING_CYCLE_1 ((1<<AXIS_1)|(1<<AXIS_2))     // OPTIONAL: uncomment to move X,Y at the same time.
-  //#define HOMING_CYCLE_1 (1<<AXIS_1) // Home X axis  // OPTIONAL: uncomment to move only X at a time.
-  //#define HOMING_CYCLE_2 (1<<AXIS_2) // Home Y axis  // OPTIONAL: uncomment to move only Y at a time.
-  //#define HOMING_CYCLE_3 (1<<AXIS_4) // Home 4th axis (A)
-  //#define HOMING_CYCLE_4 (1<<AXIS_5) // Home 5th axis (B)
-  //#define HOMING_CYCLE_5 (1<<AXIS_6) // Home 6th axis (C)
-#else // Classic 3 axis
-  #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
-  #define HOMING_CYCLE_1 ((1<<AXIS_1)|(1<<AXIS_2))     // OPTIONAL: uncomment to move X,Y at the same time.
-  //#define HOMING_CYCLE_1 (1<<AXIS_1) // Home X axis  // OPTIONAL: uncomment to move only X at a time.
-  //#define HOMING_CYCLE_2 (1<<AXIS_2) // Home Y axis  // OPTIONAL: uncomment to move only Y at a time.
-#endif
+#ifdef DEFAULTS_RAMPS_BOARD
+  #if N_AXIS == 4 // 4 axis : homing
+    #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
+    #define HOMING_CYCLE_1 (1<<AXIS_4) // Home 4th axis (A)
+    #define HOMING_CYCLE_2 (1<<AXIS_1) // Home X axis
+    #define HOMING_CYCLE_3 (1<<AXIS_2) // Home Y axis
+  #elif N_AXIS == 5 // 5 axis : homing
+    #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
+    #define HOMING_CYCLE_1 (1<<AXIS_4) // Home 4th axis (A)
+    #define HOMING_CYCLE_2 (1<<AXIS_5) // Home 5th axis (B)
+    #define HOMING_CYCLE_3 (1<<AXIS_1) // Home X axis
+    #define HOMING_CYCLE_4 (1<<AXIS_2) // Home Y axis
+  #elif N_AXIS == 6 // 6 axis : homing
+    #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
+    #define HOMING_CYCLE_1 (1<<AXIS_4) // Home 4th axis (A)
+    #define HOMING_CYCLE_2 (1<<AXIS_5) // Home 5th axis (B)
+    #define HOMING_CYCLE_3 (1<<AXIS_6) // Home 6th axis (C)
+    #define HOMING_CYCLE_4 (1<<AXIS_1) // Home X axis
+    #define HOMING_CYCLE_5 (1<<AXIS_2) // Home Y axis
+  #else // Classic 3 axis
+    #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
+    #define HOMING_CYCLE_1 (1<<AXIS_1) // Home X axis
+    #define HOMING_CYCLE_2 (1<<AXIS_2) // Home Y axis
+  #endif
+#else
+  #define HOMING_CYCLE_0 (1<<AXIS_3)                // REQUIRED: First move Z to clear workspace.
+  #define HOMING_CYCLE_1 ((1<<AXIS_1)|(1<<AXIS_2))  // OPTIONAL: Then move X,Y at the same time.
+  // #define HOMING_CYCLE_2                         // OPTIONAL: Uncomment and add axes mask to enable
+#endif // DEFAULTS_RAMPS_BOARD
 
 // NOTE: The following are two examples to setup homing for 2-axis machines.
 // #define HOMING_CYCLE_0 ((1<<AXIS_1)|(1<<AXIS_2))  // NOT COMPATIBLE WITH COREXY: Homes both X-Y in one cycle.
@@ -281,13 +294,13 @@
 // cycle is still invoked by the $H command. This is disabled by default. It's here only to address
 // users that need to switch between a two-axis and three-axis machine. This is actually very rare.
 // If you have a two-axis machine, DON'T USE THIS. Instead, just alter the homing cycle for two-axes.
-#define HOMING_SINGLE_AXIS_COMMANDS // Default disabled. Uncomment to enable.
+// #define HOMING_SINGLE_AXIS_COMMANDS // Default disabled. Uncomment to enable.
 
 // After homing, Grbl will set by default the entire machine space into negative space, as is typical
 // for professional CNC machines, regardless of where the limit switches are located. Uncomment this
 // define to force Grbl to always set the machine origin at the homed location despite switch orientation.
 // #define HOMING_FORCE_SET_ORIGIN // Uncomment to enable.
-
+#define HOMING_FORCE_SET_ORIGIN // Uncomment to enable. KH to zero dispaly
 // Number of blocks Grbl executes upon startup. These blocks are stored in EEPROM, where the size
 // and addresses are defined in settings.h. With the current settings, up to 2 startup blocks may
 // be stored and executed in order. These startup blocks would typically be used to set the g-code
@@ -318,6 +331,12 @@
 // through an automatically generated message. If disabled, users can still access the last probe
 // coordinates through Grbl '$#' print parameters.
 #define MESSAGE_PROBE_COORDINATES // Enabled by default. Comment to disable.
+
+// This option causes the feed hold input to act as a safety door switch. A safety door, when triggered,
+// immediately forces a feed hold and then safely de-energizes the machine. Resuming is blocked until
+// the safety door is re-engaged. When it is, Grbl will re-energize the machine and then resume on the
+// previous tool path, as if nothing happened.
+#define ENABLE_SAFETY_DOOR_INPUT_PIN // Default disabled. Uncomment to enable.
 
 // After the safety door switch has been toggled and restored, this setting sets the power-up delay
 // between restoring the spindle and coolant and resuming the cycle.
@@ -372,10 +391,10 @@
 //#define INVERT_DIGITAL_OUTPUT_PIN_3 // Default disabled. Uncomment to enable.
 
 // Digital inputs: Uncomment the folloing line to enable the use of up to
-// 4 digital input pins. Digital inputs work in the same way as the other input 
+// 4 digital input pins. Digital inputs work in the same way as the other input
 //#define USE_DIGITAL_INPUT // Default disabled. Uncomment to enable.
 
-// pins (probe, safety door, cycle start, reset, feed hold). 
+// pins (probe, safety door, cycle start, reset, feed hold).
 // Invert the digital input status. Default is normaly open switch between pin
 // to GND, uncomment to use normaly closed switch.
 //#define INVERT_DIGITAL_INPUT_PIN_0 // Default disabled. Uncomment to enable.
