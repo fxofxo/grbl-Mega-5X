@@ -36,7 +36,9 @@
 // NOTE: OEMs can avoid the need to maintain/update the defaults.h and cpu_map.h files and use only
 // one configuration file by placing their specific defaults and pin map at the bottom of this file.
 // If doing so, simply comment out these two defines and see instructions below.
-#define DEFAULTS_GENERIC
+//#define DEFAULTS_GENERIC
+// To use with RAMPS 1.4 Board, comment out the above define and uncomment the next two defines
+#define DEFAULTS_RAMPS_BOARD
 #define CPU_MAP_2560_RAMPS_BOARD
 
 // Serial baud rate
@@ -44,8 +46,16 @@
 #define BAUD_RATE 115200
 
 // Axis array index values. Must start with 0 and be continuous.
-#define N_AXIS 5            // Number of axes (3 to 6)
-#define N_AXIS_LINEAR 3     // Number of linears axis
+#ifdef DEFAULTS_RAMPS_BOARD
+  // 4, 5 & 6 axis support only for RAMPS 1.4 (for the moment :-)...)
+  //#define N_AXIS 5            // Number of axes
+  //#define N_AXIS_LINEAR 3     // Number of linears axis
+  #define N_AXIS  4          // Number of axes KH
+  #define N_AXIS_LINEAR 4     // Number of linears axis KH
+#else
+  #define N_AXIS 5            // Number of axes (3 to 6)
+  #define N_AXIS_LINEAR 3     // Number of linears axis
+#endif
 
 #define AXIS_1 0        // Axis indexing value. Must start with 0 and be continuous.
 #define AXIS_1_NAME 'X' // Axis names must be in X, Y, Z, A, B, C, U, V, W, D, E & H.
@@ -59,15 +69,16 @@
 #endif
 #if N_AXIS > 3
   #define AXIS_4 3
-  #define AXIS_4_NAME 'A' // Letter of axis number 4
+  //#define AXIS_4_NAME 'A' // Letter of axis number 4
+  #define AXIS_4_NAME 'U' // Letter of axis number 4 KH
 #endif
 #if N_AXIS > 4
   #define AXIS_5 4
-  #define AXIS_5_NAME 'B' // Letter of axis number 5
+  #define AXIS_5_NAME 'V' // Letter of axis number 5
 #endif
 #if N_AXIS > 5
   #define AXIS_6 5
-  #define AXIS_6_NAME 'C' // Letter of axis number 6
+  #define AXIS_6_NAME 'W' // Letter of axis number 6
 #endif
 #if N_AXIS > 6
   #error "N_AXIS must be <= 6. N_AXIS > 6 is not implemented."
@@ -84,7 +95,7 @@
 // the order of their number. Some graphical interface are not able to affect axis values reported
 // by Grbl to the correct axis name.
 // Uncomment to enable sorting of axis values by axis_names rather than by axis number. Default disabled.
-// If this option is enabled, the sorting order will be X, Y, Z, U, V, W, A, B, C, D, E & H 
+// If this option is enabled, the sorting order will be X, Y, Z, U, V, W, A, B, C, D, E & H
 // as defined below.
 //#define SORT_REPORT_BY_AXIS_NAME
 //#define AXIS_NAME_SORT_ORDER {'X', 'Y', 'Z', 'U', 'V', 'W', 'A', 'B', 'C', 'D', 'E', 'H'}
@@ -167,33 +178,35 @@
 // on separate pin, but homed in one cycle. Also, it should be noted that the function of hard limits
 // will not be affected by pin sharing.
 // NOTE: Defaults are set for a traditional 3-axis CNC machine. Z-axis first to clear, followed by X & Y.
-#if N_AXIS == 4 // 4 axis : homing
-  #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
-  #define HOMING_CYCLE_1 ((1<<AXIS_1)|(1<<AXIS_2))     // OPTIONAL: uncomment to move X,Y at the same time.
-  //#define HOMING_CYCLE_1 (1<<AXIS_1) // Home X axis  // OPTIONAL: uncomment to move only X at a time.
-  //#define HOMING_CYCLE_2 (1<<AXIS_2) // Home Y axis  // OPTIONAL: uncomment to move only Y at a time.
-  //#define HOMING_CYCLE_3 (1<<AXIS_4) // Home 4th axis (A)
-#elif N_AXIS == 5 // 5 axis : homing
-  #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
-  #define HOMING_CYCLE_1 ((1<<AXIS_1)|(1<<AXIS_2))     // OPTIONAL: uncomment to move X,Y at the same time.
-  //#define HOMING_CYCLE_1 (1<<AXIS_1) // Home X axis  // OPTIONAL: uncomment to move only X at a time.
-  //#define HOMING_CYCLE_2 (1<<AXIS_2) // Home Y axis  // OPTIONAL: uncomment to move only Y at a time.
-  //#define HOMING_CYCLE_3 (1<<AXIS_4) // Home 4th axis (A)
-  //#define HOMING_CYCLE_4 (1<<AXIS_5) // Home 5th axis (B)
-#elif N_AXIS == 6 // 6 axis : homing
-  #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
-  #define HOMING_CYCLE_1 ((1<<AXIS_1)|(1<<AXIS_2))     // OPTIONAL: uncomment to move X,Y at the same time.
-  //#define HOMING_CYCLE_1 (1<<AXIS_1) // Home X axis  // OPTIONAL: uncomment to move only X at a time.
-  //#define HOMING_CYCLE_2 (1<<AXIS_2) // Home Y axis  // OPTIONAL: uncomment to move only Y at a time.
-  //#define HOMING_CYCLE_3 (1<<AXIS_4) // Home 4th axis (A)
-  //#define HOMING_CYCLE_4 (1<<AXIS_5) // Home 5th axis (B)
-  //#define HOMING_CYCLE_5 (1<<AXIS_6) // Home 6th axis (C)
-#else // Classic 3 axis
-  #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
-  #define HOMING_CYCLE_1 ((1<<AXIS_1)|(1<<AXIS_2))     // OPTIONAL: uncomment to move X,Y at the same time.
-  //#define HOMING_CYCLE_1 (1<<AXIS_1) // Home X axis  // OPTIONAL: uncomment to move only X at a time.
-  //#define HOMING_CYCLE_2 (1<<AXIS_2) // Home Y axis  // OPTIONAL: uncomment to move only Y at a time.
-#endif
+#ifdef DEFAULTS_RAMPS_BOARD
+  #if N_AXIS == 4 // 4 axis : homing
+    #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
+    #define HOMING_CYCLE_1 (1<<AXIS_4) // Home 4th axis (A)
+    #define HOMING_CYCLE_2 (1<<AXIS_1) // Home X axis
+    #define HOMING_CYCLE_3 (1<<AXIS_2) // Home Y axis
+  #elif N_AXIS == 5 // 5 axis : homing
+    #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
+    #define HOMING_CYCLE_1 (1<<AXIS_4) // Home 4th axis (A)
+    #define HOMING_CYCLE_2 (1<<AXIS_5) // Home 5th axis (B)
+    #define HOMING_CYCLE_3 (1<<AXIS_1) // Home X axis
+    #define HOMING_CYCLE_4 (1<<AXIS_2) // Home Y axis
+  #elif N_AXIS == 6 // 6 axis : homing
+    #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
+    #define HOMING_CYCLE_1 (1<<AXIS_4) // Home 4th axis (A)
+    #define HOMING_CYCLE_2 (1<<AXIS_5) // Home 5th axis (B)
+    #define HOMING_CYCLE_3 (1<<AXIS_6) // Home 6th axis (C)
+    #define HOMING_CYCLE_4 (1<<AXIS_1) // Home X axis
+    #define HOMING_CYCLE_5 (1<<AXIS_2) // Home Y axis
+  #else // Classic 3 axis
+    #define HOMING_CYCLE_0 (1<<AXIS_3) // Home Z axis first to clear workspace.
+    #define HOMING_CYCLE_1 (1<<AXIS_1) // Home X axis
+    #define HOMING_CYCLE_2 (1<<AXIS_2) // Home Y axis
+  #endif
+#else
+  #define HOMING_CYCLE_0 (1<<AXIS_3)                // REQUIRED: First move Z to clear workspace.
+  #define HOMING_CYCLE_1 ((1<<AXIS_1)|(1<<AXIS_2))  // OPTIONAL: Then move X,Y at the same time.
+  // #define HOMING_CYCLE_2                         // OPTIONAL: Uncomment and add axes mask to enable
+#endif // DEFAULTS_RAMPS_BOARD
 
 // NOTE: The following are two examples to setup homing for 2-axis machines.
 // #define HOMING_CYCLE_0 ((1<<AXIS_1)|(1<<AXIS_2))  // NOT COMPATIBLE WITH COREXY: Homes both X-Y in one cycle.
@@ -210,13 +223,13 @@
 // cycle is still invoked by the $H command. This is disabled by default. It's here only to address
 // users that need to switch between a two-axis and three-axis machine. This is actually very rare.
 // If you have a two-axis machine, DON'T USE THIS. Instead, just alter the homing cycle for two-axes.
-#define HOMING_SINGLE_AXIS_COMMANDS // Default disabled. Uncomment to enable.
+// #define HOMING_SINGLE_AXIS_COMMANDS // Default disabled. Uncomment to enable.
 
 // After homing, Grbl will set by default the entire machine space into negative space, as is typical
 // for professional CNC machines, regardless of where the limit switches are located. Uncomment this
 // define to force Grbl to always set the machine origin at the homed location despite switch orientation.
 // #define HOMING_FORCE_SET_ORIGIN // Uncomment to enable.
-
+#define HOMING_FORCE_SET_ORIGIN // Uncomment to enable. KH to zero dispaly
 // Number of blocks Grbl executes upon startup. These blocks are stored in EEPROM, where the size
 // and addresses are defined in settings.h. With the current settings, up to 2 startup blocks may
 // be stored and executed in order. These startup blocks would typically be used to set the g-code
@@ -247,6 +260,12 @@
 // through an automatically generated message. If disabled, users can still access the last probe
 // coordinates through Grbl '$#' print parameters.
 #define MESSAGE_PROBE_COORDINATES // Enabled by default. Comment to disable.
+
+// This option causes the feed hold input to act as a safety door switch. A safety door, when triggered,
+// immediately forces a feed hold and then safely de-energizes the machine. Resuming is blocked until
+// the safety door is re-engaged. When it is, Grbl will re-energize the machine and then resume on the
+// previous tool path, as if nothing happened.
+#define ENABLE_SAFETY_DOOR_INPUT_PIN // Default disabled. Uncomment to enable.
 
 // After the safety door switch has been toggled and restored, this setting sets the power-up delay
 // between restoring the spindle and coolant and resuming the cycle.
