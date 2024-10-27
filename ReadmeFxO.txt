@@ -1,8 +1,12 @@
+
+Arduino Ide
+------------
 Para compilar sin instalar como libreria, mover examples/grblUpload/gbrlUpload.h a gbrl
 Ademas cambio en include <grbl.h> por  "grbl.h"
 
 
 LEDS.
+------
 
 LED1 is connected to the Arduino pin D13 and mirrors the Arduino 'power' LED
 LED2 is connected to the Arduino pin D8 and shows the PWM output to the hot end (wiring at D8 terminals)
